@@ -95,6 +95,29 @@ CREATE TABLE bids (
 );
 
 -- ----------------------------------------------------------------------------
+-- Bids immutability enforcement
+-- Bids are INSERT-only: UPDATE and DELETE are blocked at the database level
+-- to preserve an accurate, tamper-proof bidding history.
+-- ----------------------------------------------------------------------------
+CREATE OR REPLACE FUNCTION prevent_bids_modification()
+RETURNS TRIGGER AS $$
+BEGIN
+    RAISE EXCEPTION 'Bids are immutable. UPDATE and DELETE operations are not allowed.';
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER trg_bids_immutable_update
+    BEFORE UPDATE ON bids
+    FOR EACH ROW
+    EXECUTE FUNCTION prevent_bids_modification();
+
+CREATE TRIGGER trg_bids_immutable_delete
+    BEFORE DELETE ON bids
+    FOR EACH ROW
+    EXECUTE FUNCTION prevent_bids_modification();
+
+
+-- ----------------------------------------------------------------------------
 -- 5. auctions.winning_bid_id (composite foreign key)
 --    References bids(auction_id, id). Because both columns are included, the
 --    database guarantees the winning bid belongs to the same auction.
@@ -107,7 +130,7 @@ ALTER TABLE auctions
     ADD CONSTRAINT fk_auctions_winning_bid
     FOREIGN KEY (id, winning_bid_id)
     REFERENCES bids(auction_id, id)
-    ON DELETE SET NULL ON UPDATE CASCADE;
+    ON DELETE RESTRICT ON UPDATE CASCADE;
 
 -- ----------------------------------------------------------------------------
 -- 6. watchlists
@@ -155,7 +178,7 @@ CREATE TABLE payments (
 -- ----------------------------------------------------------------------------
 -- 8. Automatic updated_at maintenance
 --    A trigger function updates updated_at to NOW() on every row update.
---    Applied to users, auctions, bids, payments, and watchlists.
+--    Applied to users, auctions, payments, and watchlists.
 -- ----------------------------------------------------------------------------
 CREATE OR REPLACE FUNCTION update_updated_at_column()
 RETURNS TRIGGER AS $$
@@ -172,11 +195,6 @@ CREATE TRIGGER trg_users_updated_at
 
 CREATE TRIGGER trg_auctions_updated_at
     BEFORE UPDATE ON auctions
-    FOR EACH ROW
-    EXECUTE FUNCTION update_updated_at_column();
-
-CREATE TRIGGER trg_bids_updated_at
-    BEFORE UPDATE ON bids
     FOR EACH ROW
     EXECUTE FUNCTION update_updated_at_column();
 
@@ -216,3 +234,9 @@ CREATE INDEX idx_payments_status ON payments(status);
 -- ============================================================================
 -- END OF SCHEMA
 -- ============================================================================
+
+
+
+
+
+
