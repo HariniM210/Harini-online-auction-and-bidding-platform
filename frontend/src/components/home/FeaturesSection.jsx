@@ -1,0 +1,3 @@
+import Icon from '../common/Icon';
+const features=[['shield','Safe & Secure','Designed with account and transaction safety in mind.'],['bolt','Real-Time Bidding','Live bidding is planned for a future phase.'],['layers','Wide Variety','Explore categories from everyday items to collectibles.'],['users','Buy & Sell Easily','A simple marketplace experience for everyone.']];
+export default function FeaturesSection(){return <section id="about" className="container section features"><h2>Why Choose AuctionVerse?</h2><div className="feature-grid">{features.map(([icon,title,desc])=><article key={icon}><span className="feature-icon"><Icon name={icon} size={32}/></span><div><h3>{title}</h3><p>{desc}</p></div></article>)}</div></section>}

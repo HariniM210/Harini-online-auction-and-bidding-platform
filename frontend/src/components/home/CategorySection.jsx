@@ -1,0 +1,3 @@
+import categories from '../../data/categories';
+import Icon from '../common/Icon';
+export default function CategorySection({onSelect}){return <section id="categories" className="container section"><div className="section-heading"><h2>Browse by Category</h2><button className="text-link" onClick={()=>onSelect('All Categories')}>View All Categories →</button></div><div className="category-grid">{categories.map(c=><button key={c.id} className="category-card" style={{'--tile':c.color,'--tile-ink':c.iconColor}} onClick={()=>onSelect(c.name)}><Icon name={c.icon} size={32}/><span>{c.name}</span></button>)}</div></section>}
