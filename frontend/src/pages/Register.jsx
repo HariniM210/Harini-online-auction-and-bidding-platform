@@ -1,2 +1,13 @@
-import {Link} from 'react-router-dom';
-export default function Register(){return <section className="auth-preview"><h1>Register</h1><p>This page will be implemented in the next authentication phase.</p><Link to="/">Return to Home</Link></section>}
+﻿import { useState } from 'react';
+import { Link } from 'react-router-dom';
+import AuthLayout from '../components/auth/AuthLayout';
+import AuthInput from '../components/auth/AuthInput';
+import PasswordInput from '../components/auth/PasswordInput';
+export default function Register() {
+  const [values,setValues] = useState({fullName:'',email:'',phone:'',password:'',confirmPassword:''});
+  const [errors,setErrors] = useState({});
+  const [notice,setNotice] = useState('');
+  const field = name => ({name,value:values[name],error:errors[name],onChange:e=>{setValues(v=>({...v,[name]:e.target.value}));setErrors(v=>({...v,[name]:undefined,...(name==='password'?{confirmPassword:undefined}:{})}));setNotice('');}});
+  function submit(e){e.preventDefault();const next={};if(!values.fullName.trim()) next.fullName='Enter your full name.';if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email.trim())) next.email='Enter a valid email address.';if(!/^[6-9]\d{9}$/.test(values.phone.trim())) next.phone='Enter a valid 10-digit Indian mobile number.';if(values.password.length<8) next.password='Use at least 8 characters.';else if(new TextEncoder().encode(values.password).length>72) next.password='Password must be at most 72 UTF-8 bytes.';if(!values.confirmPassword) next.confirmPassword='Confirm your password.';else if(values.password!==values.confirmPassword) next.confirmPassword='Passwords do not match.';setErrors(next);setNotice(Object.keys(next).length?'':'Validation passed. Account creation is not connected to the server yet.');}
+  return <AuthLayout register><h2 id="auth-heading">Create Your Account</h2><p className="auth-subtitle">Join AuctionVerse and discover something unique.</p><form className="auth-form" onSubmit={submit} noValidate><AuthInput {...field('fullName')} label="Full name" icon="name" autoComplete="name" placeholder="Enter your full name"/><AuthInput {...field('email')} label="Email address" icon="email" type="email" autoComplete="email" placeholder="you@example.com"/><AuthInput {...field('phone')} label="Mobile number (+91)" icon="phone" type="tel" inputMode="numeric" autoComplete="tel-national" placeholder="10-digit mobile number"/><PasswordInput {...field('password')} label="Password" autoComplete="new-password" placeholder="Create a password" hint="At least 8 characters."/><PasswordInput {...field('confirmPassword')} label="Confirm password" autoComplete="new-password" placeholder="Re-enter your password"/><button className="auth-submit" type="submit">Create Account <span aria-hidden="true">→</span></button><p className="auth-notice" role="status">{notice}</p></form><p className="auth-switch">Already have an account? <Link to="/login">Sign In</Link></p></AuthLayout>;
+}
