@@ -1,0 +1,1 @@
+BEGIN;ALTER TABLE public.users ADD COLUMN mobile_number VARCHAR(16);ALTER TABLE public.users ADD CONSTRAINT chk_users_mobile_number CHECK (mobile_number IS NULL OR mobile_number ~ '^[+]91[6-9][0-9]{9}$');COMMIT;
