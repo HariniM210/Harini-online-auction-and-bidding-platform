@@ -11,4 +11,7 @@ router.delete('/watchlist/:id',authenticateToken,c.remove);
 const bidding=require('../controllers/biddingController');
 router.post('/auctions/:id/bids',authenticateToken,bidding.place);
 router.get('/auctions/:id/live',authenticateToken,bidding.stream);
+const activity=require('../controllers/activityController');
+router.get('/activity/bids',authenticateToken,activity.bids);
+router.get('/activity/watchlist',authenticateToken,activity.watchlist);
 module.exports=router;
