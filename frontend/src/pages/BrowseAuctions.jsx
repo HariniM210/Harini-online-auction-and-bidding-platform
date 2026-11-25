@@ -3,10 +3,11 @@ import { useSearchParams } from 'react-router-dom';
 import Icon from '../components/common/Icon';
 import { useAuth } from '../context/AuthContext';
 import api from '../api/axios';
+import auctionImage from '../api/auctionImage';
 import gavel from '../assets/images/seller-gavel.webp';
 import '../styles/browse.css';
 const statusOf=(a,now)=>a.status==='ended'||a.end<=now?'Ended':a.start>now?'Upcoming':'Active';
-const mapAuction=a=>({...a,id:String(a.id),bid:Number(a.price),image:a.image_url && (/^https?:\/\//i.test(a.image_url)||a.image_url.startsWith('/auction-images/'))?a.image_url:gavel,start:Date.parse(a.start_time),end:Date.parse(a.end_time)});
+const mapAuction=a=>({...a,id:String(a.id),bid:Number(a.price),image:auctionImage(a.image_url,gavel),start:Date.parse(a.start_time),end:Date.parse(a.end_time)});
 const money=n=>new Intl.NumberFormat('en-IN',{style:'currency',currency:'INR',maximumFractionDigits:0}).format(n);
 function remaining(ms){const m=Math.max(0,Math.ceil(ms/60000));return `${Math.floor(m/1440)}d ${Math.floor(m%1440/60)}h ${m%60}m`;}
 export default function BrowseAuctions({watchlist=false}){

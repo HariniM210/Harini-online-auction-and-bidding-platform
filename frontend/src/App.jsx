@@ -9,6 +9,7 @@ import Dashboard from "./pages/Dashboard";
 import DashboardSection from "./pages/DashboardSection";
 import Register from './pages/Register';
 import BrowseAuctions from './pages/BrowseAuctions';
+import {CreateAuction,MyAuctions} from './pages/SellerAuctions';
 
 import './styles/variables.css';
 import './App.css';
@@ -26,6 +27,9 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="dashboard/browse" element={<BrowseAuctions />} />
+          <Route path="dashboard/create" element={<CreateAuction key="create" />} />
+          <Route path="dashboard/my-auctions" element={<MyAuctions />} />
+          <Route path="dashboard/my-auctions/:id/edit" element={<CreateAuction key="edit" />} />
           <Route path="dashboard/:section" element={<DashboardSection />} />
           <Route path="admin" element={<DashboardSection admin />} />
         </Route>
