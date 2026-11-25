@@ -1,0 +1,10 @@
+require('dotenv').config();
+const bcrypt=require('bcrypt');
+const {pool}=require('../config/db');
+const readline=require('node:readline');
+const {Writable}=require('node:stream');
+let muted=false;
+const output=new Writable({write(chunk,encoding,callback){if(!muted)process.stdout.write(chunk);callback();}});
+const rl=readline.createInterface({input:process.stdin,output,terminal:true});
+const ask=q=>new Promise(resolve=>rl.question(q,resolve));
+(async()=>{try{const email=(await ask('Admin email: ')).trim().toLowerCase();const name=(await ask('Admin full name: ')).trim();process.stdout.write('Admin password (hidden): ');muted=true;const password=await ask('');muted=false;process.stdout.write('\n');if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)||email.length>255||!name||name.length>255||password.length<12||Buffer.byteLength(password)>72)throw Error('Invalid details; password must be at least 12 characters and at most 72 bytes');const hash=await bcrypt.hash(password,12);await pool.query("INSERT INTO public.users(email,full_name,password_hash,role) VALUES($1,$2,$3,'admin')",[email,name,hash]);console.log('Admin created. Sign in at /admin/login');}catch(e){console.error(e.code==='23505'?'Email already exists; no account changed.':e.message);process.exitCode=1;}finally{rl.close();await pool.end();}})();

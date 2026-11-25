@@ -23,6 +23,7 @@ app.use('/api/payments',require('./routes/paymentRoutes'));
 
 // Authentication routes
 app.use('/api/auth', authRoutes);
+app.use('/api/admin', require('./routes/adminRoutes'));
 app.use('/api/users', userRoutes);
 app.use('/api', require('./routes/browseRoutes'));
 
