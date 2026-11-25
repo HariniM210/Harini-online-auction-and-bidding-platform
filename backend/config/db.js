@@ -18,6 +18,26 @@ async function query(text, params) {
     const result = await pool.query(text, params);
     return result;
   } catch (error) {
+    console.error('PostgreSQL error:', {
+      message: error.message,
+      code: error.code,
+      position: error.position
+    });
+
+    console.error('Failed SQL:', text);
+
+    if (error.position) {
+      const position = Number(error.position) - 1;
+
+      console.error(
+        'Error near:',
+        text.slice(
+          Math.max(0, position - 80),
+          position + 80
+        )
+      );
+    }
+
     throw error;
   }
 }

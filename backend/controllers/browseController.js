@@ -1,3 +1,4 @@
+const {detailStats}=require('./auctionDetailStats');
 const { query } = require('../config/db');
 const base = `SELECT a.id, a.title, a.description, a.seller_id, a.category_id, COALESCE(c.name,'Uncategorized') AS category, a.image_url, a.start_time, a.end_time, a.created_at, a.starting_price, a.min_bid_increment, b.highest AS current_bid, COALESCE(b.highest,a.starting_price) AS price, CASE WHEN a.status NOT IN ('upcoming','active','ended','closed','completed','sold') THEN a.status WHEN a.status IN ('ended','closed','completed','sold') OR a.end_time <= now() THEN 'ended' WHEN a.start_time > now() THEN 'upcoming' ELSE 'active' END AS status FROM public.auctions a LEFT JOIN public.categories c ON c.id=a.category_id LEFT JOIN LATERAL (SELECT max(amount) AS highest FROM public.bids WHERE auction_id=a.id) b ON true`;
 const visible = `status IN ('active','upcoming','ended')`;
@@ -38,29 +39,16 @@ exports.list = wrap(async(req,res)=>{
  const r=await query(`${sql} SELECT (SELECT count(*)::int FROM matched) AS total, COALESCE((SELECT jsonb_agg(to_jsonb(p) || jsonb_build_object('id',p.id::text,'seller_id',p.seller_id::text,'category_id',p.category_id::text) ORDER BY ${sorts[sort]}) FROM (SELECT * FROM matched ORDER BY ${sorts[sort]} LIMIT 6 OFFSET ${add((Number(page)-1)*6)}) p),'[]'::jsonb) AS items`,args);
  ok(res,{...r.rows[0],page:Number(page),pageSize:6});
 });
-exports.detail = wrap(async (req, res) => {
-  if (!validId(req.params.id)) {
-    return bad(res, 'Invalid auction ID');
-  }
-
-  const r = await query(
-    `WITH listings AS (${base})
-     SELECT *
-     FROM listings
-     WHERE id = $1
-       AND ${visible}
-       AND seller_id <> $2`,
-    [req.params.id, req.user.id]
-  );
-
-  if (!r.rows.length) {
-    return res.status(404).json({
-      status: 'error',
-      message: 'Auction not found'
-    });
-  }
-
-  ok(res, r.rows[0]);
+exports.detail = wrap(async (req,res) => {
+  if (!validId(req.params.id)) return bad(res,'Invalid auction ID');
+  const r = await query(`WITH listings AS (${base})
+    SELECT l.*, u.full_name AS seller_name, u.created_at AS seller_joined,
+      EXISTS(SELECT 1 FROM public.watchlists w WHERE w.auction_id=l.id AND w.user_id=$2) AS is_saved,
+      ${detailStats('l')}
+    FROM listings l JOIN public.users u ON u.id=l.seller_id
+    WHERE l.id=$1 AND l.status IN ('active','upcoming','ended') AND l.seller_id<>$2`,[req.params.id,req.user.id]);
+  if (!r.rows.length) return res.status(404).json({status:'error',message:'Auction not found'});
+  ok(res,r.rows[0]);
 });
 exports.save = wrap(async (req, res) => {
   const id = req.body?.auction_id;

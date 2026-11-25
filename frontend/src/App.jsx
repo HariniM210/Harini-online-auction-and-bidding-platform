@@ -8,6 +8,7 @@ import DashboardLayout from "./components/dashboard/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import DashboardSection from "./pages/DashboardSection";
 import Register from './pages/Register';
+import AuctionDetails from './pages/AuctionDetails';
 import BrowseAuctions from './pages/BrowseAuctions';
 import {CreateAuction,MyAuctions} from './pages/SellerAuctions';
 
@@ -27,6 +28,8 @@ function App() {
         <Route element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
           <Route path="dashboard/browse" element={<BrowseAuctions />} />
+          <Route path="dashboard/browse/:id" element={<AuctionDetails key="buyer" />} />
+          <Route path="dashboard/my-auctions/:id" element={<AuctionDetails key="seller" seller />} />
           <Route path="dashboard/create" element={<CreateAuction key="create" />} />
           <Route path="dashboard/my-auctions" element={<MyAuctions />} />
           <Route path="dashboard/my-auctions/:id/edit" element={<CreateAuction key="edit" />} />
