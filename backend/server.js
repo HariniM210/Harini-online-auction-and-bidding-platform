@@ -43,7 +43,12 @@ app.use((err, req, res, next) => {
   res.status(500).json({ status: 'error', message: 'Internal server error' });
 });
 
+const {finalize}=require('./controllers/biddingController');
+let finalizing=false;
+async function settle(){if(finalizing)return;finalizing=true;try{await finalize()}catch(e){console.error('Auction finalizer:',e.message)}finally{finalizing=false}}
 app.listen(PORT, () => {
+  settle();
+  setInterval(settle,5000).unref();
   console.log(`Server running on port ${PORT}`);
 });
 

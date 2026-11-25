@@ -1,6 +1,6 @@
 const {detailStats}=require('./auctionDetailStats');
 const { query } = require('../config/db');
-const base = `SELECT a.id, a.title, a.description, a.seller_id, a.category_id, COALESCE(c.name,'Uncategorized') AS category, a.image_url, a.start_time, a.end_time, a.created_at, a.starting_price, a.min_bid_increment, b.highest AS current_bid, COALESCE(b.highest,a.starting_price) AS price, CASE WHEN a.status NOT IN ('upcoming','active','ended','closed','completed','sold') THEN a.status WHEN a.status IN ('ended','closed','completed','sold') OR a.end_time <= now() THEN 'ended' WHEN a.start_time > now() THEN 'upcoming' ELSE 'active' END AS status FROM public.auctions a LEFT JOIN public.categories c ON c.id=a.category_id LEFT JOIN LATERAL (SELECT max(amount) AS highest FROM public.bids WHERE auction_id=a.id) b ON true`;
+const base = `SELECT a.id, a.title, a.description, a.seller_id, a.category_id, COALESCE(c.name,'Uncategorized') AS category, a.image_url, a.start_time, a.end_time, a.created_at, a.starting_price, a.min_bid_increment, a.winning_bid_id, b.highest AS current_bid, COALESCE(b.highest,a.starting_price) AS price, CASE WHEN a.status NOT IN ('upcoming','active','ended','closed','completed','sold') THEN a.status WHEN a.status IN ('ended','closed','completed','sold') OR a.end_time <= now() THEN 'ended' WHEN a.start_time > now() THEN 'upcoming' ELSE 'active' END AS status FROM public.auctions a LEFT JOIN public.categories c ON c.id=a.category_id LEFT JOIN LATERAL (SELECT max(amount) AS highest FROM public.bids WHERE auction_id=a.id) b ON true`;
 const visible = `status IN ('active','upcoming','ended')`;
 const wrap = fn => async (req,res,next) => { try { await fn(req,res); } catch(e) { next(e); } };
 const ok = (res,data) => res.json({status:'success',data});
@@ -44,6 +44,9 @@ exports.detail = wrap(async (req,res) => {
   const r = await query(`WITH listings AS (${base})
     SELECT l.*, u.full_name AS seller_name, u.created_at AS seller_joined,
       EXISTS(SELECT 1 FROM public.watchlists w WHERE w.auction_id=l.id AND w.user_id=$2) AS is_saved,
+      (SELECT max(amount) FROM public.bids WHERE auction_id=l.id AND bidder_id=$2) AS my_highest_bid,
+      EXISTS(SELECT 1 FROM public.bids WHERE auction_id=l.id AND bidder_id=$2 AND id=l.winning_bid_id) AS i_won,
+      EXISTS(SELECT 1 FROM public.bids WHERE auction_id=l.id AND bidder_id=$2 AND amount=l.current_bid) AS i_lead,
       ${detailStats('l')}
     FROM listings l JOIN public.users u ON u.id=l.seller_id
     WHERE l.id=$1 AND l.status IN ('active','upcoming','ended') AND l.seller_id<>$2`,[req.params.id,req.user.id]);

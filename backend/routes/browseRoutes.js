@@ -8,4 +8,7 @@ router.get('/auctions/:id',authenticateToken,c.detail);
 router.get('/watchlist',(req,res,next)=>{req.watchlistOnly=true;next();},authenticateToken,c.list);
 router.post('/watchlist',authenticateToken,c.save);
 router.delete('/watchlist/:id',authenticateToken,c.remove);
+const bidding=require('../controllers/biddingController');
+router.post('/auctions/:id/bids',authenticateToken,bidding.place);
+router.get('/auctions/:id/live',authenticateToken,bidding.stream);
 module.exports=router;
