@@ -8,6 +8,7 @@ import DashboardLayout from "./components/dashboard/DashboardLayout";
 import Dashboard from "./pages/Dashboard";
 import DashboardSection from "./pages/DashboardSection";
 import Register from './pages/Register';
+import BrowseAuctions from './pages/BrowseAuctions';
 
 import './styles/variables.css';
 import './App.css';
@@ -24,6 +25,7 @@ function App() {
         </Route>
         <Route element={<DashboardLayout />}>
           <Route path="dashboard" element={<Dashboard />} />
+          <Route path="dashboard/browse" element={<BrowseAuctions />} />
           <Route path="dashboard/:section" element={<DashboardSection />} />
           <Route path="admin" element={<DashboardSection admin />} />
         </Route>

@@ -1,0 +1,11 @@
+const express=require('express');
+const {authenticateToken}=require('../middleware/auth');
+const c=require('../controllers/browseController');
+const router=express.Router();
+router.get('/categories',authenticateToken,c.categories);
+router.get('/auctions',authenticateToken,c.list);
+router.get('/auctions/:id',authenticateToken,c.detail);
+router.get('/watchlist',(req,res,next)=>{req.watchlistOnly=true;next();},authenticateToken,c.list);
+router.post('/watchlist',authenticateToken,c.save);
+router.delete('/watchlist/:id',authenticateToken,c.remove);
+module.exports=router;

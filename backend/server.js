@@ -20,6 +20,7 @@ app.use(express.json());
 // Authentication routes
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api', require('./routes/browseRoutes'));
 
 app.get('/api/health/db', async (req, res, next) => {
   try {
