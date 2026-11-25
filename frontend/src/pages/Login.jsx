@@ -6,6 +6,7 @@ import {
   useLocation,
 } from "react-router-dom";
 import axios from "axios";
+import { useAuth } from "../context/AuthContext";
 import AuthLayout from "../components/auth/AuthLayout";
 import "../styles/auth.css";
 
@@ -13,6 +14,7 @@ const API_BASE_URL = "http://localhost:5000/api";
 
 const Login = () => {
   const navigate = useNavigate();
+  const { login } = useAuth();
   const location = useLocation();
 
   const [email, setEmail] = useState("");
@@ -26,8 +28,6 @@ const Login = () => {
     location.state?.message || ""
   );
 
-  const [authenticatedUser, setAuthenticatedUser] =
-    useState(null);
 
   const validate = () => {
     const newErrors = {};
@@ -56,7 +56,6 @@ const Login = () => {
 
     setNotice("");
     setSuccess("");
-    setAuthenticatedUser(null);
 
     if (!validate()) return;
 
@@ -83,9 +82,8 @@ const Login = () => {
         user &&
         token
       ) {
-        setAuthenticatedUser(user);
-        setPassword("");
-        setSuccess("Login successful!");
+        login(user, token);
+        navigate(user.role === "admin" ? "/admin" : "/dashboard", { replace: true });
       } else {
         setNotice("Authentication could not be confirmed.");
       }
@@ -160,42 +158,6 @@ const Login = () => {
         </div>
       )}
 
-      {authenticatedUser ? (
-        <div
-          style={{
-            display: "grid",
-            gap: "16px",
-            textAlign: "center",
-          }}
-        >
-          <h3>
-            Welcome, {authenticatedUser.full_name}!
-          </h3>
-
-          <p>{authenticatedUser.email}</p>
-
-          <p style={{ color: "#6B7280", fontSize: "14px" }}>
-            Your credentials have been verified successfully.
-          </p>
-
-          <button
-            type="button"
-            onClick={() => navigate("/")}
-            style={{
-              width: "100%",
-              padding: "13px",
-              background: "#7C3AED",
-              color: "#FFFFFF",
-              border: "none",
-              borderRadius: "8px",
-              cursor: "pointer",
-              fontWeight: "600",
-            }}
-          >
-            Continue to Home
-          </button>
-        </div>
-      ) : (
         <form
           className="auth-form"
           onSubmit={handleSubmit}
@@ -329,7 +291,6 @@ const Login = () => {
             </Link>
           </p>
         </form>
-      )}
     </AuthLayout>
   );
 };
