@@ -1,0 +1,12 @@
+const router=require('express').Router();
+const {authenticateToken}=require('../middleware/auth');
+const c=require('../controllers/userController');
+router.use(authenticateToken);
+router.patch('/profile',c.updateProfile);
+router.patch('/password',c.changePassword);
+router.get('/addresses',c.listAddresses);
+router.post('/addresses',c.addAddress);
+router.patch('/addresses/:id',c.editAddress);
+router.delete('/addresses/:id',c.deleteAddress);
+router.patch('/addresses/:id/default',c.defaultAddress);
+module.exports=router;

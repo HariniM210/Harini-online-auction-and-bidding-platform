@@ -9,5 +9,5 @@ export default function AuthProvider({ children }) {
     const timer = setTimeout(() => setSession(null), Math.max(0, Math.min(2147483647, (expiry || Date.now()) - Date.now())));
     return () => clearTimeout(timer);
   }, [session]);
-  return <AuthContext.Provider value={{ user: session?.user ?? null, token: session?.token ?? null, login: (user, token) => setSession({user, token}), logout: () => setSession(null) }}>{children}</AuthContext.Provider>;
+  return <AuthContext.Provider value={{ user: session?.user ?? null, token: session?.token ?? null, login: (user, token) => setSession({user, token}), updateUser: (user, token) => setSession(current => current?.token === token ? {...current, user} : current), logout: () => setSession(null) }}>{children}</AuthContext.Provider>;
 }

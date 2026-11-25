@@ -3,6 +3,7 @@ const express = require('express');
 const cors = require('cors');
 const { testConnection } = require('./config/db');
 const authRoutes = require('./routes/authRoutes');
+const userRoutes = require('./routes/userRoutes');
 
 // Fail safely if required JWT configuration is missing
 if (!process.env.JWT_SECRET) {
@@ -18,6 +19,7 @@ app.use(express.json());
 
 // Authentication routes
 app.use('/api/auth', authRoutes);
+app.use('/api/users', userRoutes);
 
 app.get('/api/health/db', async (req, res, next) => {
   try {

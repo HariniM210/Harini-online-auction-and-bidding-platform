@@ -29,7 +29,7 @@ const authenticateToken = async (req, res, next) => {
 
     let decoded;
     try {
-      decoded = jwt.verify(token, secret);
+      decoded = jwt.verify(token, secret, { algorithms: ['HS256'] });
     } catch (jwtError) {
       if (jwtError.name === 'TokenExpiredError') {
         return res.status(401).json({ status: 'error', message: 'Token expired' });
