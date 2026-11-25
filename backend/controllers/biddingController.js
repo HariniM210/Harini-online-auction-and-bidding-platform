@@ -30,7 +30,7 @@ exports.stream=async(req,res,next)=>{
 };
 exports.finalize=async()=>{
  const c=await pool.connect();let ids=[];
- try{await c.query('BEGIN');const r=await c.query("SELECT id FROM public.auctions WHERE status IN ('upcoming','active') AND end_time<=clock_timestamp() ORDER BY id LIMIT 100 FOR UPDATE SKIP LOCKED");ids=r.rows.map(x=>String(x.id));
+ try{await c.query('BEGIN');const r=await c.query("SELECT id FROM public.auctions WHERE end_time<=clock_timestamp() AND (status IN ('upcoming','active') OR (status='ended' AND winning_bid_id IS NULL AND EXISTS (SELECT 1 FROM public.bids b WHERE b.auction_id=auctions.id))) ORDER BY id LIMIT 100 FOR UPDATE SKIP LOCKED");ids=r.rows.map(x=>String(x.id));
  for(const id of ids)await c.query("UPDATE public.auctions SET status='ended',winning_bid_id=(SELECT id FROM public.bids WHERE auction_id=$1 ORDER BY amount DESC,id ASC LIMIT 1),updated_at=now() WHERE id=$1",[id]);
  await c.query('COMMIT');for(const id of ids)events.emit(id);
  }catch(e){await c.query('ROLLBACK').catch(()=>{});throw e;}finally{c.release();}

@@ -14,4 +14,5 @@ router.get('/auctions/:id/live',authenticateToken,bidding.stream);
 const activity=require('../controllers/activityController');
 router.get('/activity/bids',authenticateToken,activity.bids);
 router.get('/activity/watchlist',authenticateToken,activity.watchlist);
+router.get('/activity/results',authenticateToken,require('../controllers/resultsController').list);
 module.exports=router;

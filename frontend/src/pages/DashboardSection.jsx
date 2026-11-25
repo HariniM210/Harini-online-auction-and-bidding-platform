@@ -1,9 +1,11 @@
 import { Link, useParams } from 'react-router-dom';
 import MyAccount from './MyAccount';
 import BidActivity from './BidActivity';
+import AuctionResults from './AuctionResults';
 const titles={account:'My Account',bids:'My Bids','my-auctions':'My Auctions',watchlist:'My Watchlist',create:'Create an Auction','how-it-works':'How It Works'};
 export default function DashboardSection({admin=false}){
  const {section}=useParams();
+ if (!admin && ['won-auctions','auction-results'].includes(section)) return <AuctionResults key={section} sellerView={section==='auction-results'}/>;
  if (!admin && section==='watchlist') return <BidActivity key='watchlist' watchlist/>;
  if (!admin && section==='bids') return <BidActivity key='bids'/>;
  if (!admin && section==='account') return <MyAccount/>;
