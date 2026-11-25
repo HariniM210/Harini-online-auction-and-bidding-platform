@@ -1,0 +1,13 @@
+const router=require('express').Router();
+const {authenticateToken}=require('../middleware/auth');
+const c=require('../controllers/paymentController');
+router.use(authenticateToken,(req,res,next)=>req.user.role==='user'?next():res.status(403).json({status:'error',message:'User account required'}));
+router.post('/checkout/:id',c.checkout);
+router.post('/checkout/:id/defer',c.defer);
+router.post('/checkout/:id/create',c.create);
+router.post('/checkout/:id/verify',c.verify);
+router.post('/checkout/:id/refresh',c.refresh);
+router.get('/orders',c.list);
+router.get('/orders/:id',c.detail);
+router.patch('/orders/:id/shipping',c.ship);
+module.exports=router;
